@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF--8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rynaki Module Documentation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+        
+        h1, h2, h3, h4 {
+            color: #333;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #e1e1e1;
+            margin-top: 2em;
+        }
+
+        h1 {
+            border-bottom: 2px solid #333;
+        }
+        
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: "Courier New", Courier, monospace;
+            border: 1px solid #e1e1e1;
+        }
+        
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e1e1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            position: relative;
+        }
+        
+        pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            line-height: 1.5;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #666;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .container {
+            background-color: #ffffff;
+            padding: 0;
+        }
+        
+        .class-doc, .method-doc, .attribute-doc {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid #e1e1e1;
+            border-radius: 5px;
+        }
+        
+        .method-doc, .attribute-doc {
+            background-color: #fafafa;
+            margin-left: 20px;
+        }
+
+        .params-table-wrapper {
+             overflow-x: auto;
+        }
+        
+        .params-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .params-table th, .params-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .params-table th {
+            background-color: #f5f5f5;
+        }
+        
+        hr {
+            border: none;
+            border-top: 1px solid #e1e1e1;
+            margin: 40px 0;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            h1 { font-size: 1.8em; }
+            h2 { font-size: 1.5em; }
+            h3 { font-size: 1.2em; }
+
+            .method-doc, .attribute-doc {
+                margin-left: 0; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>rynaki Module Documentation</h1>
+        <p>This documentation provides a comprehensive, detailed overview of the <code>rynaki</code> module, which acts as a Python wrapper for the Akinator game API. It allows you to programmatically start a game, answer questions, and retrieve Akinator's final guess.</p>
+
+        <h2>Installation</h2>
+        <p>Install the module via pip from your terminal.</p>
+        <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>pip install rynaki</code></pre>
+
+        <h2>Full Usage Example</h2>
+        <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>import rynaki
+
+# Initialize the Akinator game in English for characters
+aki = rynaki.Akinator(lang="en", theme="characters")
+
+# Start the game and get the first question
+question = aki.start_game()
+print(f"Q: {question}")
+
+# Main game loop continues until Akinator has found a character
+while aki.name is None:
+    # Get user input. For simplicity, we use a basic input prompt.
+    # In a real app, you might use a GUI with buttons.
+    answer = input("Your answer (y/n/idk/p/pn): ").lower()
+    if answer not in ["y", "n", "idk", "p", "pn"]:
+        print("Invalid input. Please try again.")
+        continue
+    
+    # Post the answer to the API and get the next question
+    aki.post_answer(answer)
+
+    # Display the new question if the game is not over
+    if aki.name is None:
+        print(f"Q: {aki.question} ({aki.progression:.2f}%)")
+
+# Print the final guess from Akinator
+print("\n--- Akinator's Guess ---")
+print(f"Character: {aki.name}")
+print(f"Description: {aki.description}")
+print(f"Photo: {aki.photo}")</code></pre>
+
+        <hr>
+
+        <h2>Classes</h2>
+
+        <div class="class-doc">
+            <h3><code>class AkinatorError(Exception)</code></h3>
+            <p>A custom exception class used to signal errors specific to the <code>rynaki</code> module. This helps in distinguishing module-related issues from general Python errors. It is raised for invalid API responses, incorrect answer formats, or if a method is called at an inappropriate time (e.g., <code>go_back()</code> at the first question).</p>
+        </div>
+
+        <div class="class-doc">
+            <h3><code>class Akinator(...)</code></h3>
+            <p>The primary class for managing and interacting with an Akinator game session.</p>
+            
+            <h4><code>__init__(self, theme: str = "characters", lang: str = "ar", child_mode: bool = False)</code></h4>
+            <p>Initializes a new Akinator game session. This sets up the necessary HTTP client and configures the session based on the provided arguments.</p>
+            
+            <div class="params-table-wrapper">
+                <table class="params-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>theme</code></td>
+                            <td>str</td>
+                            <td>"characters"</td>
+                            <td>Specifies the game's subject category. Must be one of: <code>"characters"</code>, <code>"objects"</code>, or <code>"animals"</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><code>lang</code></td>
+                            <td>str</td>
+                            <td>"ar"</td>
+                            <td>A two-letter country code for the game's language (e.g., <code>"en"</code>, <code>"es"</code>, <code>"fr"</code>, <code>"ar"</code>).</td>
+                        </tr>
+                        <tr>
+                            <td><code>child_mode</code></td>
+                            <td>bool</td>
+                            <td>False</td>
+                            <td>If <code>True</code>, enables a child-safe mode that filters questions and results.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="method-doc">
+                <h4><code>start_game(self)</code></h4>
+                <p>Begins a new game session. It resets any prior game state and fetches the first question from the Akinator API.</p>
+                <p><strong>Returns:</strong> A <code>str</code> containing the first question.</p>
+            </div>
+
+            <div class="method-doc">
+                <h4><code>post_answer(self, answer: str)</code></h4>
+                <p>Submits an answer to the current question and advances the game. This method updates the internal state with the next question or, if the game is over, with the final guess.</p>
+                <p><strong>Parameters:</strong></p>
+                <ul>
+                    <li><code>answer</code> (str): The answer, which must be one of: <code>'y'</code>, <code>'n'</code>, <code>'idk'</code>, <code>'p'</code>, or <code>'pn'</code>.</li>
+                </ul>
+                <p><strong>Returns:</strong> A <code>dict</code> containing the raw JSON response from the API.</p>
+                <p><strong>Raises:</strong> <code>AkinatorError</code> if the answer format is invalid or if the API request fails.</p>
+            </div>
+
+            <div class="method-doc">
+                <h4><code>go_back(self)</code></h4>
+                <p>Reverts the game to the previous question. This is useful for correcting a mistaken answer.</p>
+                <p><strong>Returns:</strong> A <code>dict</code> containing the raw API response for the previous state.</p>
+                <p><strong>Raises:</strong> <code>AkinatorError</code> if called on the first question (step 0).</p>
+            </div>
+
+            <div class="method-doc">
+                <h4><code>exclude(self)</code></h4>
+                <p>Used after Akinator makes an incorrect guess. This method tells the API to discard the last proposition and provide an alternative guess or a new question.</p>
+                <p><strong>Returns:</strong> A <code>dict</code> containing the raw API response with the new game state.</p>
+                <p><strong>Raises:</strong> <code>AkinatorError</code> if the API request fails.</p>
+            </div>
+            
+            <h4>Public Instance Attributes</h4>
+            <p>These attributes store the live state of the game and are accessible for reading.</p>
+
+            <div class="attribute-doc">
+                <h5><code>question</code> (str)</h5>
+                <p>The current question text.</p>
+            </div>
+            <div class="attribute-doc">
+                <h5><code>step</code> (int)</h5>
+                <p>The current question number, starting from 0.</p>
+            </div>
+            <div class="attribute-doc">
+                <h5><code>progression</code> (float)</h5>
+                <p>The game's completion percentage (e.g., 85.5).</p>
+            </div>
+            <div class="attribute-doc">
+                <h5><code>name</code> (str | None)</h5>
+                <p>The guessed name. Is <code>None</code> until a guess is made.</p>
+            </div>
+            <div class="attribute-doc">
+                <h5><code>description</code> (str | None)</h5>
+                <p>A short description of the guessed entity. Is <code>None</code> until a guess is made.</p>
+            </div>
+             <div class="attribute-doc">
+                <h5><code>photo</code> (str | None)</h5>
+                <p>A URL to an image of the guess. Is <code>None</code> until a guess is made.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function copyToClipboard(button) {
+            const preBlock = button.parentElement;
+            const codeBlock = preBlock.querySelector('code');
+            const textToCopy = codeBlock.innerText || codeBlock.textContent;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.style.background = '#e8f5e8';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#fff';
+                }, 2000);
+            }).catch((err) => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+    </script>
+
+</body>
+</html>
