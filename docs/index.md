@@ -1,5 +1,3 @@
-<div id="particles-js"></div>
-
 # rynaki Module Documentation
 
 This documentation provides a comprehensive, detailed overview of the `rynaki` module, which acts as a Python wrapper for the Akinator game API. It allows you to programmatically start a game, answer questions, and retrieve Akinator's final guess.
@@ -44,7 +42,8 @@ while aki.name is None:
 print("\n--- Akinator's Guess ---")
 print(f"Character: {aki.name}")
 print(f"Description: {aki.description}")
-print(f"Photo: {aki.photo}")```
+print(f"Photo: {aki.photo}")
+```
 
 ---
 
