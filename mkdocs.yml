@@ -1,0 +1,9 @@
+site_name: rynaki Docs
+
+extra:
+  generator: false
+
+theme:
+  name: material
+  copyright: "© mineogo 2024-2025"
+  favicon: images/favicon.ico
