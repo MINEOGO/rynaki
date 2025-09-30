@@ -1,48 +1,56 @@
 # rynaki Module Documentation
 
-This documentation provides a comprehensive, detailed overview of the `rynaki` module, which acts as a Python wrapper for the Akinator game API. It allows you to programmatically start a game, answer questions, and retrieve Akinator's final guess.
+This documentation provides a comprehensive overview of the `rynaki` module, an unofficial Python API wrapper for the Akinator game. It allows you to programmatically start a game, answer questions, and retrieve Akinator's final guess in both synchronous and asynchronous applications.
 
 ## Installation
 
 Install the module via `pip` from your terminal.
 
-```python
+```bash
 pip install rynaki
 ```
 
-## Full Usage Example
+## Asynchronous Usage Example
+
+This example demonstrates the correct way to use `rynaki` in an asynchronous application (e.g., a Discord bot, FastAPI server). Since the library's network requests are blocking, we use `asyncio.to_thread` to run them without freezing the application.
 
 ```python
+import asyncio
 import rynaki
 
-# Initialize the Akinator game in English for characters
-aki = rynaki.Akinator(lang="en", theme="characters")
+async def main():
+    try:
+        # Initialize the Akinator game
+        aki = rynaki.Akinator(lang="en", theme="characters")
 
-# Start the game and get the first question
-question = aki.start_game()
-print(f"Q: {question}")
+        # Start the game and get the first question in a non-blocking way
+        question = await asyncio.to_thread(aki.start_game)
+        print(f"Q: {question}")
 
-# Main game loop continues until Akinator has found a character
-while aki.name is None:
-    # Get user input. For simplicity, we use a basic input prompt.
-    # In a real app, you might use a GUI with buttons.
-    answer = input("Your answer (y/n/idk/p/pn): ").lower()
-    if answer not in ["y", "n", "idk", "p", "pn"]:
-        print("Invalid input. Please try again.")
-        continue
-    
-    # Post the answer to the API and get the next question
-    aki.post_answer(answer)
+        # Main game loop continues until Akinator has a guess
+        while aki.name is None:
+            answer = input("Your answer (y/n/idk/p/pn): ").lower()
+            if answer not in ["y", "n", "idk", "p", "pn"]:
+                print("Invalid input. Please try again.")
+                continue
 
-    # Display the new question if the game is not over
-    if aki.name is None:
-        print(f"Q: {aki.question} ({aki.progression:.2f}%)")
+            # Post the answer without blocking the event loop
+            await asyncio.to_thread(aki.post_answer, answer)
 
-# Print the final guess from Akinator
-print("\n--- Akinator's Guess ---")
-print(f"Character: {aki.name}")
-print(f"Description: {aki.description}")
-print(f"Photo: {aki.photo}")
+            if aki.name is None:
+                print(f"Q: {aki.question} ({aki.progression:.2f}%)")
+
+        # Print the final guess from Akinator
+        print("\n--- Akinator's Guess ---")
+        print(f"Character: {aki.name}")
+        print(f"Description: {aki.description}")
+        print(f"Photo: {aki.photo}")
+
+    except rynaki.AkinatorError as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ---
@@ -77,6 +85,8 @@ start_game(self) -> str
 ```
 Begins a new game session. It resets any prior game state and fetches the first question from the Akinator API.
 
+> **Note:** This is a blocking, network-bound operation. In an asynchronous application, it should be run in a separate thread to avoid blocking the event loop (e.g., using `asyncio.to_thread`).
+
 **Returns:**
 *   `str`: The first question.
 
@@ -85,6 +95,8 @@ Begins a new game session. It resets any prior game state and fetches the first 
 post_answer(self, answer: str) -> dict
 ```
 Submits an answer to the current question and advances the game. This method updates the internal state with the next question or, if the game is over, with the final guess.
+
+> **Note:** This is a blocking, network-bound operation. In an asynchronous application, it should be run in a separate thread.
 
 **Parameters:**
 *   **`answer`** (`str`): The answer, which must be one of: `'y'`, `'n'`, `'idk'`, `'p'`, or `'pn'`.
@@ -101,6 +113,8 @@ go_back(self) -> dict
 ```
 Reverts the game to the previous question. This is useful for correcting a mistaken answer.
 
+> **Note:** This is a blocking, network-bound operation. In an asynchronous application, it should be run in a separate thread.
+
 **Returns:**
 *   `dict`: The raw API response for the previous state.
 
@@ -112,6 +126,8 @@ Reverts the game to the previous question. This is useful for correcting a mista
 exclude(self) -> dict
 ```
 Used after Akinator makes an incorrect guess. This method tells the API to discard the last proposition and provide an alternative guess or a new question.
+
+> **Note:** This is a blocking, network-bound operation. In an asynchronous application, it should be run in a separate thread.
 
 **Returns:**
 *   `dict`: The raw API response with the new game state.
